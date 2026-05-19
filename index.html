@@ -209,12 +209,91 @@
   ::-webkit-scrollbar-track { background:transparent; }
   ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
   ::-webkit-scrollbar-thumb:hover { background:var(--text2); }
-  @media (max-width:720px) {
-    .main { flex-direction:column; }
-    .editor-pane { border-right:none; border-bottom:1px solid var(--border); }
-    .output-pane { max-width:100%; min-height:200px; }
-    .examples-label,.logo-badge { display:none; }
+  /* ── Mobile tab bar (hidden on desktop) ────────── */
+  .mobile-tabs {
+    display: none;
   }
+
+  /* ── Mobile layout ─────────────────────────────── */
+  @media (max-width: 700px) {
+    /* Body fills the screen without overflow */
+    body { height: 100dvh; overflow: hidden; }
+
+    /* Compact header */
+    header {
+      padding: 8px 12px;
+      gap: 8px;
+      flex-wrap: nowrap;
+    }
+    .logo-text { font-size: 15px; }
+    .logo-badge { display: none; }
+    .logo-icon { width: 26px; height: 26px; }
+    .examples-label { display: none; }
+    select.examples-select { max-width: 130px; font-size: 12px; padding: 4px 8px; }
+    /* Hide "Share" text, keep icon only */
+    .btn-share .share-label { display: none; }
+    .btn-share { padding: 6px 10px; }
+    .btn-run { padding: 7px 14px; font-size: 13px; }
+
+    /* Tab bar */
+    .mobile-tabs {
+      display: flex;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .mobile-tab {
+      flex: 1;
+      padding: 9px 0;
+      font-size: 13px;
+      font-weight: 600;
+      text-align: center;
+      background: none;
+      border: none;
+      color: var(--text2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .mobile-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent);
+    }
+
+    /* Main: each pane fills the available space, only active one shows */
+    .main {
+      flex-direction: column;
+      position: relative;
+    }
+    .editor-pane,
+    .output-pane {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      border-right: none;
+      max-width: 100%;
+      min-width: 0;
+      min-height: 0;
+    }
+    .editor-pane.mobile-active,
+    .output-pane.mobile-active {
+      display: flex;
+    }
+    /* Editor itself must fill its pane */
+    #editor { flex: 1; min-height: 0; }
+
+    /* Status bar is too wide for mobile — hide it */
+    .statusbar { display: none; }
+
+    /* Fix the about popup so it doesn't overflow the screen */
+    .about-content {
+      width: calc(100vw - 32px);
+      left: auto;
+      right: 0;
+    }
+  }
+
 </style>
 </head>
 <body>
@@ -245,7 +324,7 @@
     <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor">
       <path d="M11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5z"/>
     </svg>
-    Share
+    <span class="share-label">Share</span>
   </button>
   <button class="btn-run" id="btnRun">
     <svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
@@ -253,8 +332,17 @@
   </button>
 </header>
 
+<div class="mobile-tabs" id="mobileTabs">
+  <button class="mobile-tab active" id="tabEditor">
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:5px"><path d="M9.854 3.146a.5.5 0 0 1 0 .708L6.707 7l3.147 3.146a.5.5 0 0 1-.708.708l-3.5-3.5a.5.5 0 0 1 0-.708l3.5-3.5a.5.5 0 0 1 .708 0z"/><path d="M.5 1.5A.5.5 0 0 1 1 1h14a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zm0 5A.5.5 0 0 1 1 6h6a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5zm0 4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H1a.5.5 0 0 1-.5-.5z"/></svg>Editor
+  </button>
+  <button class="mobile-tab" id="tabOutput">
+    <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" style="vertical-align:-2px;margin-right:5px"><path d="M1 2.5A1.5 1.5 0 0 1 2.5 1h11A1.5 1.5 0 0 1 15 2.5v9A1.5 1.5 0 0 1 13.5 13H8.366l-2.682 2.682A.5.5 0 0 1 5 15.5v-2.5H2.5A1.5 1.5 0 0 1 1 11.5v-9z"/></svg>Output
+  </button>
+</div>
+
 <div class="main">
-  <div class="editor-pane">
+  <div class="editor-pane mobile-active">
     <div class="pane-header">
       <div class="dot"></div>
       <span class="filename">main.wren</span>
@@ -289,7 +377,7 @@
   <span>·</span>
 
   <span>
-    Browser-based Wren compiler — runs 100% client-side with no installation required
+    Browser-based Wren compiler - runs 100% client-side with no installation required
   </span>
 
   <span>·</span>
@@ -693,6 +781,8 @@ require(['vs/editor/editor.main'], function() {
       execTime.textContent = elapsed + 'ms';
       btn.classList.remove('running');
       btn.innerHTML = '<svg viewBox="0 0 16 16" fill="currentColor" width="13" height="13"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg> Run';
+      // On mobile, auto-switch to the Output tab after running
+      if (window.innerWidth <= 700) switchMobileTab('output');
     }, 10);
   }
 
@@ -712,6 +802,29 @@ require(['vs/editor/editor.main'], function() {
     document.getElementById('statusText').textContent = 'ready';
     document.getElementById('execTime').textContent = '';
   });
+
+  // ── Mobile tab switching ────────────────────────────────────────
+  function switchMobileTab(tab) {
+    const editorPane = document.querySelector('.editor-pane');
+    const outputPane = document.querySelector('.output-pane');
+    const tabEditor  = document.getElementById('tabEditor');
+    const tabOutput  = document.getElementById('tabOutput');
+    if (tab === 'editor') {
+      editorPane.classList.add('mobile-active');
+      outputPane.classList.remove('mobile-active');
+      tabEditor.classList.add('active');
+      tabOutput.classList.remove('active');
+      // Refresh Monaco so it fills the pane correctly
+      if (typeof editor !== 'undefined') editor.layout();
+    } else {
+      outputPane.classList.add('mobile-active');
+      editorPane.classList.remove('mobile-active');
+      tabOutput.classList.add('active');
+      tabEditor.classList.remove('active');
+    }
+  }
+  document.getElementById('tabEditor').addEventListener('click', () => switchMobileTab('editor'));
+  document.getElementById('tabOutput').addEventListener('click', () => switchMobileTab('output'));
 
   document.getElementById('btnShare').addEventListener('click', () => {
     const code = editor.getValue();
