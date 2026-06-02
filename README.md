@@ -2,9 +2,10 @@
 
 > **Run Wren code instantly in your browser. No installation, no server, no runtime dependencies.**
 
-[![Run Wren Online](https://img.shields.io/badge/run%20wren-online-brightgreen)](https://wren-compiler.netlify.app/)
 [![Language](https://img.shields.io/badge/language-Wren-blueviolet)](https://wren.io)
 [![License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
+## https://wren-compiler.netlify.app/ 
 
 ---
 
